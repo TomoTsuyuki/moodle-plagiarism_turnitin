@@ -536,6 +536,22 @@ function xmldb_plagiarism_turnitin_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2021101800, 'plagiarism', 'turnitin');
     }
 
+    if ($oldversion < 2021121600) {
+        $table = new xmldb_table('plagiarism_turnitin_config');
+        // Delete index if exists.
+        $index = new xmldb_index('config_hash', XMLDB_INDEX_UNIQUE, array('config_hash'));
+        if ($dbman->index_exists($table, $index)) {
+            $dbman->drop_index($table, $index);
+        }
+        // Set config_hash to default to null, also set precision 255.
+        $field = new xmldb_field('config_hash', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null, 'value');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->change_field_notnull($table, $field);
+        }
+
+        upgrade_plugin_savepoint(true, 2021121600, 'plagiarism', 'turnitin');
+    }
+
     return $result;
 }
 
